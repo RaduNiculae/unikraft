@@ -1,0 +1,94 @@
+##SPDX-License-Identifier: BSD-3-Clause */
+##
+##Authors: Sharan Santhanam <sharan.santhanam@neclab.eu>
+##
+##Copyright (c) 2020, NEC Laboratories GmbH
+##
+##Redistribution and use in source and binary forms, with or without
+##modification, are permitted provided that the following conditions
+##are met:
+##
+##1. Redistributions of source code must retain the above copyright
+##   notice, this list of conditions and the following disclaimer.
+##2. Redistributions in binary form must reproduce the above copyright
+##   notice, this list of conditions and the following disclaimer in the
+##   documentation and/or other materials provided with the distribution.
+##3. Neither the name of the copyright holder nor the names of its
+##   contributors may be used to endorse or promote products derived from
+##   this software without specific prior written permission.
+##
+##THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+##AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+##IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+##ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+##LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+##CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+##SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+##INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+##CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+##ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+##POSSIBILITY OF SUCH DAMAGE.
+##
+
+ZYNQMP_LDFLAGS-y	 += -Wl,-m,aarch64elf
+
+##
+## Link image
+##
+ZYNQMP_IMAGE := $(BUILD_DIR)/$(CONFIG_UK_NAME)_zynqmp-$(CONFIG_UK_ARCH)
+ZYNQMP_DEBUG_IMAGE := $(ZYNQMP_IMAGE).dbg.elf
+ZYNQMP_IMAGE_ELF := $(ZYNQMP_IMAGE).elf
+
+#ZYNQMP_LD_SCRIPT_FLAGS := $(addprefix -Wl$(comma)-dT$(comma),\
+#			 $(LIBZYNQMPPLAT_BASE)/link_xilinx.ld)
+ZYNQMP_LD_SCRIPT_FLAGS := $(addprefix -Wl$(comma)-dT$(comma),\
+			 $(UK_PLAT_ZYNQMP_DEF_LDS))
+ZYNQMP_LD_SCRIPT_FLAGS += $(addprefix -Wl$(comma)-T$(comma),\
+			$(ZYNQMP_LD_SCRIPT-y) $(EXTRA_LD_SCRIPT-y))
+
+$(ZYNQMP_DEBUG_IMAGE): $(ZYNQMP_ALIBS) $(ZYNQMP_ALIBS-y) $(ZYNQMP_OLIBS) $(ZYNQMP_OLIBS-y) \
+		    $(UK_ALIBS) $(UK_ALIBS-y) $(UK_OLIBS) $(UK_OLIBS-y)
+	$(call build_cmd,LD,,$(ZYNQMP_IMAGE_ELF).ld.o,\
+	       $(LD) -r $(LIBLDFLAGS) $(LIBLDFLAGS-y) \
+			$(ZYNQMP_LDFLAGS) $(ZYNQMP_LDFLAGS-y) \
+			$(ZYNQMP_OLIBS) $(ZYNQMP_OLIBS-y) \
+			$(UK_OLIBS) $(UK_OLIBS-y) \
+			-Wl$(comma)--start-group \
+			$(ZYNQMP_ALIBS) $(ZYNQMP_ALIBS-y) \
+			$(UK_ALIBS) $(UK_ALIBS-y) \
+			-Wl$(comma)--end-group \
+			-o $(ZYNQMP_IMAGE_ELF).ld.o)
+	$(call build_cmd,OBJCOPY,,$(ZYNQMP_IMAGE_ELF).o,\
+		$(OBJCOPY) -w -G _vector_table\
+			$(ZYNQMP_IMAGE_ELF).ld.o $(ZYNQMP_IMAGE_ELF).o)
+	$(call build_cmd,LD,,$@,\
+	       $(LD) $(LDFLAGS) $(LDFLAGS-y) \
+		     $(ZYNQMP_LDFLAGS) $(ZYNQMP_LDFLAGS-y) \
+		     $(ZYNQMP_LD_SCRIPT_FLAGS) \
+		     $(ZYNQMP_IMAGE_ELF).o -o $@)
+
+$(ZYNQMP_IMAGE_ELF): $(ZYNQMP_IMAGE).dbg.elf
+	$(call build_cmd,SCSTRIP,,$@,\
+		$(SCRIPTS_DIR)/sect-strip.py \
+			$(SECT_STRIP_FLAGS) $(SECT_STRIP_FLAGS-y) \
+			--with-objcopy=$(OBJCOPY) \
+			$< -o $@ && \
+		$(STRIP) -s $@)
+
+$(ZYNQMP_IMAGE).sym: $(ZYNQMP_DEBUG_IMAGE)
+	$(call build_cmd,NM,,$@, $(NM) -n $< > $@)
+
+$(ZYNQMP_IMAGE_ELF).gz: $(ZYNQMP_IMAGE_ELF)
+	$(call build_cmd,GZ,,$@, $(GZIP) -f -9 -c $< >$@)
+
+# register images to the build
+ifeq ($(CONFIG_PLAT_ZYNQMP),y)
+UK_DEBUG_IMAGES-y                     += $(ZYNQMP_DEBUG_IMAGE)
+UK_IMAGES-y                           += $(ZYNQMP_IMAGE_ELF)
+UK_IMAGES-$(CONFIG_OPTIMIZE_SYMFILE)  += $(ZYNQMP_IMAGE).sym
+UK_IMAGES-$(CONFIG_OPTIMIZE_COMPRESS) += $(ZYNQMP_IMAGE_ELF).gz
+endif
+
+# ...for cleaning:
+LIBZYNQMPPLAT_CLEAN += $(call build_clean,$(ZYNQMP_IMAGE_ELF).o)
+LIBZYNQMPPLAT_CLEAN += $(call build_clean,$(ZYNQMP_IMAGE_ELF).ld.o)

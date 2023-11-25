@@ -1,0 +1,9 @@
+# Register your lib to Unikraft's build system
+$(eval $(call addlib_s,libukdrivershimlayer,$(CONFIG_LIBUKDRIVERSHIMLAYER)))
+
+# Add library source code to compilation
+LIBUKDRIVERSHIMLAYER_SRCS-y += $(LIBUKDRIVERSHIMLAYER_BASE)/xgpiops.c
+
+# Extend the global include paths with library's folder
+CINCLUDES-$(CONFIG_LLIBUKDRIVERSHIMLAYER) += -I$(LIBUKDRIVERSHIMLAYER_BASE)/include
+CXXINCLUDES-$(CONFIG_LLIBUKDRIVERSHIMLAYER) += -I$(LIBUKDRIVERSHIMLAYER_BASE)/include
