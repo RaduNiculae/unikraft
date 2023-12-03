@@ -1,5 +1,5 @@
 #include <uk/asm.h>
-#include <arm/cpu_defs.h> 
+#include <arm/cpu_defs_zynq.h> 
 
 .global _boot
 .global _libplat_entry

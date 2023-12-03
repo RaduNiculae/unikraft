@@ -113,6 +113,9 @@
 #define CDNC_UART_TX_WATER_OFF  0xF
 
 
+typedef const volatile __u32* uk_reg32_t;
+typedef const volatile  __u64* uk_reg64_t;
+
 /*
  * Xilinx UARTPS base address
  */

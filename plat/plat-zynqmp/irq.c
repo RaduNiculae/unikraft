@@ -35,6 +35,9 @@
 #include <errno.h>
 #include <uk/bitops.h>
 
+typedef int (*irq_handler_func_t)(void *);
+#define __MAX_IRQ 16
+
 static struct uk_alloc *allocator;
 
 struct irq_handler {
@@ -99,4 +102,13 @@ int ukplat_irq_init(struct uk_alloc *a)
 	UK_ASSERT(allocator == NULL);
 	allocator = a;
 	return 0;
+}
+
+void ukplat_lcpu_halt_irq(void)
+{
+	UK_ASSERT(ukplat_lcpu_irqs_disabled());
+
+	ukplat_lcpu_enable_irq();
+	halt();
+	ukplat_lcpu_disable_irq();
 }

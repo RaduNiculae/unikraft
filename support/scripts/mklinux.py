@@ -50,7 +50,7 @@ def main():
 
     ram_base = get_sym_val(opt.elf, r'_start_ram_addr')
     img_base = get_sym_val(opt.elf, r'_base_addr')
-    entry = get_sym_val(opt.elf, r'_libkvmplat_entry')
+    entry = get_sym_val(opt.elf, r'_libplat_entry')
 
     # code1
     #
@@ -99,6 +99,7 @@ def main():
         f.seek(0)
         for field in [k for k in LINUX_ARM64_HDR.keys()]:
             f.write(LINUX_ARM64_HDR[field][0].to_bytes(LINUX_ARM64_HDR[field][1], 'little'))
+            print(LINUX_ARM64_HDR[field][0])
         f.write(img)
 
 if __name__ == '__main__':

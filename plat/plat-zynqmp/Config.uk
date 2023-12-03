@@ -6,7 +6,9 @@ menuconfig PLAT_ZYNQMP
        select LIBUKALLOC
        select LIBUKTIMECONV
        select LIBNOLIBC if !HAVE_LIBC
-       select LIBFDT if ARCH_ARM_64
+       select LIBFDT
+       select LIBUKOFW
+       select HAVE_INTCTLR
        help
                 Create a Unikraft image that runs as a KVM guest
 

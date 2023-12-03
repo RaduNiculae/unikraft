@@ -35,7 +35,7 @@
 #include <uk/arch/limits.h>
 #include <uk/asm.h>
 #include <arm/mm.h>
-#include <arm/cpu_defs.h>
+#include <arm/cpu_defs_zynq.h>
 #include <xparameters.h>
 /*
  * TODO: Address the memory map for the page table Zyqmp platform

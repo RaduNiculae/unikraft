@@ -46,6 +46,8 @@ _STACK_SIZE = DEFINED(_STACK_SIZE) ? _STACK_SIZE : 0x1000;
 _HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0x10000;
 _START_ADDRESS =  0x10000000;
 
+PHDRS {}
+
 
 /*
  * We use mmu to control each section's attribute, so the boundaries
@@ -54,12 +56,15 @@ _START_ADDRESS =  0x10000000;
  * is readonly+exec. So the _text must start at a 4KiB alignment
  * address.
  */
+ 
+
 SECTIONS {
 
 	. = _START_ADDRESS;
 
 	/* Place DTB binary at the beginning of the RAM */
 	_dtb = .;
+	_start_ram_addr = .;
 	. = . + DTB_RESERVED_SIZE;
 
 		_text = .;

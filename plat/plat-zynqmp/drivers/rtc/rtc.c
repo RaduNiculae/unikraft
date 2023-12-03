@@ -191,6 +191,16 @@
 #define RTC_CALIB_DEF			0x198233
 #define RTCPSU_CRYSTAL_OSC_EN      ((uint32_t)1 << RTC_CTL_OSC_SHIFT)
 
+typedef const volatile __u32* uk_reg32_t;
+typedef const volatile  __u64* uk_reg64_t;
+
+struct rtc_device {
+	// Base address of the device.
+	const void *addr;
+	uint64_t   size;
+	// Identifier of the device.
+	int id;
+};
 
 /**
  * We assume there is a rtc device.

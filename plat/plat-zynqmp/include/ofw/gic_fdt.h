@@ -31,36 +31,21 @@
  *
  * THIS HEADER MAY NOT BE EXTRACTED OR MODIFIED IN ANY WAY.
  */
-#include <uk/assert.h>
-#include <zynqmp/intctrl.h>
-#include <arm/cpu.h>
-#include <arm/irq.h>
-// #include <gic/gic-v2.h>
-#include <zynqmp/config.h>
-#include <uk/essentials.h>
 
-void intctrl_init(void)
-{
-	int ret;
+#ifndef __PLAT_DRV_GIC_FDT_H__
+#define __PLAT_DRV_GIC_FDT_H__
 
-	/* Initialize GIC from DTB */
-	ret = _dtb_init_gic(_libzynqmpplat_cfg.dtb.pbase);
-	if (ret)
-		UK_CRASH("Initialize GIC from DTB failed, ret=%d\n", ret);
-
-}
-
-void intctrl_ack_irq(unsigned int irq __unused)
-{
-	//NOP
-}
-
-void intctrl_mask_irq(unsigned int irq)
-{
-	gic_disable_irq(irq);
-}
-
-void intctrl_clear_irq(unsigned int irq)
-{
-	gic_enable_irq(irq);
-}
+/**
+ * Get an interrupt number of given index from device tree
+ * @param fdt Device tree blob
+ * @param nodeoffset device node offset
+ * @param index the index of interrupt we want to retrieve
+ * @param irq_type output the interrupt type e.g. SPI, PPI, SGI
+ * @param hwirq output the hardware irq number
+ * @param trigger_type. output to tell e.g. edge or level trigger
+ * @return 0 on success, a negative errno value on errors
+ */
+int gic_get_irq_from_dtb(const void *fdt, int nodeoffset, int index,
+			uint32_t *irq_type, uint32_t *hwirq,
+			uint32_t *trigger_type);
+#endif /* __PLAT_DRV_GIC_FDT_H__ */

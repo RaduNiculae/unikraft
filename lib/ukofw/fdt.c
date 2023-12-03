@@ -83,26 +83,26 @@ int fdt_find_irq_parent_offset(const void *fdt, int offset)
 	return fdt_node_offset_by_phandle(fdt, irq_parent);
 }
 
-int fdt_interrupt_cells(const void *fdt, int offset)
-{
-	int intc_offset;
-	int val;
-	int ret;
+// int fdt_interrupt_cells(const void *fdt, int offset)
+// {
+// 	int intc_offset;
+// 	int val;
+// 	int ret;
 
-	intc_offset = fdt_find_irq_parent_offset(fdt, offset);
-	if (intc_offset < 0)
-		return intc_offset;
+// 	intc_offset = fdt_find_irq_parent_offset(fdt, offset);
+// 	if (intc_offset < 0)
+// 		return intc_offset;
 
-	ret = fdt_getprop_u32_by_offset(fdt, intc_offset, "#interrupt-cells",
-					(uint32_t *)&val);
-	if (ret < 0)
-		return ret;
+// 	ret = fdt_getprop_u32_by_offset(fdt, intc_offset, "#interrupt-cells",
+// 					(uint32_t *)&val);
+// 	if (ret < 0)
+// 		return ret;
 
-	if ((val <= 0) || (val > FDT_MAX_NCELLS))
-		return -FDT_ERR_BADNCELLS;
+// 	if ((val <= 0) || (val > FDT_MAX_NCELLS))
+// 		return -FDT_ERR_BADNCELLS;
 
-	return val;
-}
+// 	return val;
+// }
 
 /* Default translator (generic bus) */
 static void fdt_default_count_cells(const void *fdt, int parentoffset,
@@ -190,185 +190,185 @@ finish:
  * this walks up the tree and applies the various bus mappings on the
  * way.
  */
-uint64_t fdt_translate_address_by_ranges(const void *fdt,
-					int node_offset, const fdt32_t *regs)
-{
-	int parent;
-	fdt32_t addr[FDT_MAX_ADDR_CELLS];
-	int na, ns, pna, pns;
-	uint64_t result = FDT_BAD_ADDR;
+// uint64_t fdt_translate_address_by_ranges(const void *fdt,
+// 					int node_offset, const fdt32_t *regs)
+// {
+// 	int parent;
+// 	fdt32_t addr[FDT_MAX_ADDR_CELLS];
+// 	int na, ns, pna, pns;
+// 	uint64_t result = FDT_BAD_ADDR;
 
-	/* Get parent */
-	parent = fdt_parent_offset(fdt, node_offset);
-	if (parent < 0)
-		goto bail;
+// 	/* Get parent */
+// 	parent = fdt_parent_offset(fdt, node_offset);
+// 	if (parent < 0)
+// 		goto bail;
 
-	/* Count address cells & copy address locally */
-	fdt_default_count_cells(fdt, parent, &na, &ns);
-	if (!FDT_CHECK_COUNTS(na, ns)) {
-		uk_pr_err("Bad cell count for %s\n",
-		       fdt_get_name(fdt, node_offset, NULL));
-		goto bail;
-	}
-	memcpy(addr, regs, na * 4);
+// 	/* Count address cells & copy address locally */
+// 	fdt_default_count_cells(fdt, parent, &na, &ns);
+// 	if (!FDT_CHECK_COUNTS(na, ns)) {
+// 		uk_pr_err("Bad cell count for %s\n",
+// 		       fdt_get_name(fdt, node_offset, NULL));
+// 		goto bail;
+// 	}
+// 	memcpy(addr, regs, na * 4);
 
-	/* Translate */
-	for (;;) {
-		/* Switch to parent bus */
-		node_offset = parent;
-		parent = fdt_parent_offset(fdt, node_offset);
+// 	/* Translate */
+// 	for (;;) {
+// 		/* Switch to parent bus */
+// 		node_offset = parent;
+// 		parent = fdt_parent_offset(fdt, node_offset);
 
-		/* If root, we have finished */
-		if (parent < 0) {
-			uk_pr_debug("reached root node\n");
-			result = fdt_reg_read_number(addr, na);
-			break;
-		}
+// 		/* If root, we have finished */
+// 		if (parent < 0) {
+// 			uk_pr_debug("reached root node\n");
+// 			result = fdt_reg_read_number(addr, na);
+// 			break;
+// 		}
 
-		/* Get new parent bus and counts */
-		fdt_default_count_cells(fdt, parent, &pna, &pns);
-		if (!FDT_CHECK_COUNTS(pna, pns)) {
-			uk_pr_err("Bad cell count for %s\n",
-				fdt_get_name(fdt, node_offset, NULL));
-			break;
-		}
+// 		/* Get new parent bus and counts */
+// 		fdt_default_count_cells(fdt, parent, &pna, &pns);
+// 		if (!FDT_CHECK_COUNTS(pna, pns)) {
+// 			uk_pr_err("Bad cell count for %s\n",
+// 				fdt_get_name(fdt, node_offset, NULL));
+// 			break;
+// 		}
 
-		uk_pr_debug("parent bus (na=%d, ns=%d) on %s\n",
-			 pna, pns, fdt_get_name(fdt, parent, NULL));
+// 		uk_pr_debug("parent bus (na=%d, ns=%d) on %s\n",
+// 			 pna, pns, fdt_get_name(fdt, parent, NULL));
 
-		/* Apply bus translation */
-		if (fdt_translate_one(fdt, node_offset,
-					addr, na, ns, pna, "ranges"))
-			break;
+// 		/* Apply bus translation */
+// 		if (fdt_translate_one(fdt, node_offset,
+// 					addr, na, ns, pna, "ranges"))
+// 			break;
 
-		/* Complete the move up one level */
-		na = pna;
-		ns = pns;
-	}
-bail:
-	return result;
-}
+// 		/* Complete the move up one level */
+// 		na = pna;
+// 		ns = pns;
+// 	}
+// bail:
+// 	return result;
+// }
 
-int fdt_get_address(const void *fdt, int nodeoffset, uint32_t index,
-			uint64_t *addr, uint64_t *size)
-{
-	int parentoffset;
-	int len, prop_addr, prop_size;
-	int naddr, nsize, term_size;
-	const void *regs;
+// int fdt_get_address(const void *fdt, int nodeoffset, uint32_t index,
+// 			uint64_t *addr, uint64_t *size)
+// {
+// 	int parentoffset;
+// 	int len, prop_addr, prop_size;
+// 	int naddr, nsize, term_size;
+// 	const void *regs;
 
-	UK_ASSERT(addr && size);
+// 	UK_ASSERT(addr && size);
 
-	/*
-	 * Get address,size cell from parent
-	 * DT Spec v0.2, section 2.3.5 "#address-cells and #size-cells"
-	 */
-	parentoffset = fdt_parent_offset(fdt, nodeoffset);
-	if (parentoffset < 0)
-		return parentoffset;
+// 	/*
+// 	 * Get address,size cell from parent
+// 	 * DT Spec v0.2, section 2.3.5 "#address-cells and #size-cells"
+// 	 */
+// 	parentoffset = fdt_parent_offset(fdt, nodeoffset);
+// 	if (parentoffset < 0)
+// 		return parentoffset;
 
-	naddr = fdt_address_cells(fdt, parentoffset);
-	if (naddr < 0 || naddr >= FDT_MAX_NCELLS)
-		return naddr;
+// 	naddr = fdt_address_cells(fdt, parentoffset);
+// 	if (naddr < 0 || naddr >= FDT_MAX_NCELLS)
+// 		return naddr;
 
-	nsize = fdt_size_cells(fdt, parentoffset);
-	if (nsize < 0 || nsize >= FDT_MAX_NCELLS)
-		return nsize;
+// 	nsize = fdt_size_cells(fdt, parentoffset);
+// 	if (nsize < 0 || nsize >= FDT_MAX_NCELLS)
+// 		return nsize;
 
-	/* Get reg content */
-	regs = fdt_getprop(fdt, nodeoffset, "reg", &len);
-	if (regs == NULL)
-		return len;
+// 	/* Get reg content */
+// 	regs = fdt_getprop(fdt, nodeoffset, "reg", &len);
+// 	if (regs == NULL)
+// 		return len;
 
-	term_size = sizeof(fdt32_t) * (nsize + naddr);
-	prop_addr = term_size * index;
-	prop_size = prop_addr + sizeof(fdt32_t) * naddr;
+// 	term_size = sizeof(fdt32_t) * (nsize + naddr);
+// 	prop_addr = term_size * index;
+// 	prop_size = prop_addr + sizeof(fdt32_t) * naddr;
 
-	/* The reg content must cover the reg term[index] at least */
-	if (len < (prop_addr + term_size))
-		return -FDT_ERR_NOSPACE;
+// 	/* The reg content must cover the reg term[index] at least */
+// 	if (len < (prop_addr + term_size))
+// 		return -FDT_ERR_NOSPACE;
 
-	*size = fdt_reg_read_number(regs + prop_size, nsize);
-	*addr = fdt_translate_address_by_ranges(fdt, nodeoffset,
-						regs + prop_addr);
+// 	*size = fdt_reg_read_number(regs + prop_size, nsize);
+// 	*addr = fdt_translate_address_by_ranges(fdt, nodeoffset,
+// 						regs + prop_addr);
 
-	if (*addr == FDT_BAD_ADDR)
-		return -FDT_ERR_NOTFOUND;
-	return 0;
-}
+// 	if (*addr == FDT_BAD_ADDR)
+// 		return -FDT_ERR_NOTFOUND;
+// 	return 0;
+// }
 
-int fdt_node_offset_by_compatible_list(const void *fdt, int startoffset,
-				  const char * const compatibles[])
-{
-	int idx, min_offset = INT_MAX, offset;
+// int fdt_node_offset_by_compatible_list(const void *fdt, int startoffset,
+// 				  const char * const compatibles[])
+// {
+// 	int idx, min_offset = INT_MAX, offset;
 
-	for (idx = 0; compatibles[idx] != NULL; idx++) {
-		offset = fdt_node_offset_by_compatible(fdt, startoffset,
-				  compatibles[idx]);
-		if (offset >= 0 && offset < min_offset)
-			min_offset = offset;
-	}
+// 	for (idx = 0; compatibles[idx] != NULL; idx++) {
+// 		offset = fdt_node_offset_by_compatible(fdt, startoffset,
+// 				  compatibles[idx]);
+// 		if (offset >= 0 && offset < min_offset)
+// 			min_offset = offset;
+// 	}
 
-	if (min_offset != INT_MAX)
-		return min_offset;
+// 	if (min_offset != INT_MAX)
+// 		return min_offset;
 
-	return -FDT_ERR_NOTFOUND;
-}
+// 	return -FDT_ERR_NOTFOUND;
+// }
 
-int fdt_node_offset_idx_by_compatible_list(const void *fdt, int startoffset,
-			  const char * const compatibles[], int *index)
-{
-	int idx, min_offset = INT_MAX, offset, compatible_idx;
+// int fdt_node_offset_idx_by_compatible_list(const void *fdt, int startoffset,
+// 			  const char * const compatibles[], int *index)
+// {
+// 	int idx, min_offset = INT_MAX, offset, compatible_idx;
 
-	for (idx = 0; compatibles[idx] != NULL; idx++) {
-		offset = fdt_node_offset_by_compatible(fdt, startoffset,
-				  compatibles[idx]);
-		if (offset >= 0 && offset < min_offset) {
-			min_offset = offset;
-			compatible_idx = idx;
-		}
-	}
+// 	for (idx = 0; compatibles[idx] != NULL; idx++) {
+// 		offset = fdt_node_offset_by_compatible(fdt, startoffset,
+// 				  compatibles[idx]);
+// 		if (offset >= 0 && offset < min_offset) {
+// 			min_offset = offset;
+// 			compatible_idx = idx;
+// 		}
+// 	}
 
-	if (min_offset != INT_MAX) {
-		*index = compatible_idx;
-		return min_offset;
-	}
+// 	if (min_offset != INT_MAX) {
+// 		*index = compatible_idx;
+// 		return min_offset;
+// 	}
 
-	return -FDT_ERR_NOTFOUND;
-}
+// 	return -FDT_ERR_NOTFOUND;
+// }
 
-int fdt_get_interrupt(const void *fdt, int nodeoffset,
-			uint32_t index, int *size, fdt32_t **prop)
-{
-	int nintr, len, term_size;
-	const void *regs;
+// int fdt_get_interrupt(const void *fdt, int nodeoffset,
+// 			uint32_t index, int *size, fdt32_t **prop)
+// {
+// 	int nintr, len, term_size;
+// 	const void *regs;
 
-	UK_ASSERT(size && prop);
+// 	UK_ASSERT(size && prop);
 
-	nintr = fdt_interrupt_cells(fdt, nodeoffset);
-	if (nintr < 0 || nintr >= FDT_MAX_NCELLS)
-		return -FDT_ERR_BADNCELLS;
+// 	nintr = fdt_interrupt_cells(fdt, nodeoffset);
+// 	if (nintr < 0 || nintr >= FDT_MAX_NCELLS)
+// 		return -FDT_ERR_BADNCELLS;
 
-	/* "interrupts-extended" is not supported */
-	regs = fdt_getprop(fdt, nodeoffset, "interrupts-extended", &len);
-	if (regs) {
-		uk_pr_warn("interrupts multiple parents is not supported\n");
-		return -FDT_ERR_INTERNAL;
-	}
+// 	/* "interrupts-extended" is not supported */
+// 	regs = fdt_getprop(fdt, nodeoffset, "interrupts-extended", &len);
+// 	if (regs) {
+// 		uk_pr_warn("interrupts multiple parents is not supported\n");
+// 		return -FDT_ERR_INTERNAL;
+// 	}
 
-	/*
-	 * Interrupt content must cover the index specific irq information.
-	 */
-	regs = fdt_getprop(fdt, nodeoffset, "interrupts", &len);
-	term_size = sizeof(fdt32_t) * nintr;
-	if (regs == NULL || (uint32_t)len < term_size * (index + 1))
-		return -FDT_ERR_NOTFOUND;
+// 	/*
+// 	 * Interrupt content must cover the index specific irq information.
+// 	 */
+// 	regs = fdt_getprop(fdt, nodeoffset, "interrupts", &len);
+// 	term_size = sizeof(fdt32_t) * nintr;
+// 	if (regs == NULL || (uint32_t)len < term_size * (index + 1))
+// 		return -FDT_ERR_NOTFOUND;
 
-	*size = nintr;
-	*prop = (fdt32_t *)(regs + term_size * index);
+// 	*size = nintr;
+// 	*prop = (fdt32_t *)(regs + term_size * index);
 
-	return 0;
-}
+// 	return 0;
+// }
 
 bool fdt_prop_read_bool(const void *fdt, int start_offset,
 					 const char *propname)

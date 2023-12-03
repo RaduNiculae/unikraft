@@ -1,8 +1,8 @@
 /* SPDX-License-Identifier: BSD-3-Clause */
 /*
- * Authors: Wei Chen <wei.chen@arm.com>
+ * Authors: Jia He <justin.he@arm.com>
  *
- * Copyright (c) 2018, Arm Ltd., All rights reserved.
+ * Copyright (c) 2019, Arm Ltd. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,36 +31,26 @@
  *
  * THIS HEADER MAY NOT BE EXTRACTED OR MODIFIED IN ANY WAY.
  */
+#include <libfdt_env.h>
+#include <ofw/fdt.h>
 #include <uk/assert.h>
-#include <zynqmp/intctrl.h>
-#include <arm/cpu.h>
-#include <arm/irq.h>
-// #include <gic/gic-v2.h>
-#include <zynqmp/config.h>
-#include <uk/essentials.h>
 
-void intctrl_init(void)
+int gic_get_irq_from_dtb(const void *fdt, int nodeoffset, int index,
+			uint32_t *irq_type, uint32_t *hwirq,
+			uint32_t *trigger_type)
 {
-	int ret;
+	fdt32_t *prop;
+	int ret, size;
 
-	/* Initialize GIC from DTB */
-	ret = _dtb_init_gic(_libzynqmpplat_cfg.dtb.pbase);
-	if (ret)
-		UK_CRASH("Initialize GIC from DTB failed, ret=%d\n", ret);
+	UK_ASSERT(irq_type != NULL && hwirq != NULL && trigger_type != NULL);
 
-}
+	ret = fdt_get_interrupt(fdt, nodeoffset, index, &size, &prop);
+	if (ret < 0)
+		return ret;
 
-void intctrl_ack_irq(unsigned int irq __unused)
-{
-	//NOP
-}
+	*irq_type = fdt32_to_cpu(prop[0]);
+	*hwirq = fdt32_to_cpu(prop[1]);
+	*trigger_type = fdt32_to_cpu(prop[2]);
 
-void intctrl_mask_irq(unsigned int irq)
-{
-	gic_disable_irq(irq);
-}
-
-void intctrl_clear_irq(unsigned int irq)
-{
-	gic_enable_irq(irq);
+	return 0;
 }

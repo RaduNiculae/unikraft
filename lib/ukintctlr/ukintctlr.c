@@ -31,7 +31,7 @@
 #include <uk/plat/lcpu.h>
 #include <uk/plat/time.h>
 #include <uk/intctlr.h>
-#include <uk/intctlr/limits.h>
+#include <uk/limits.h>
 #include <uk/assert.h>
 #include <uk/event.h>
 #include <uk/trace.h>
