@@ -2,7 +2,7 @@
 ZYNQMP_LDFLAGS-y += -Wl,--entry=_libplat_entry
 ZYNQMP_LDFLAGS-y += -Wl,-m,aarch64elf
 ZYNQMP_LINK_LIBGCC_FLAG := -lgcc
-LINUX_HDR_ARM64 := y
+# LINUX_HDR_ARM64 := y
 ##
 ## Link image
 ##

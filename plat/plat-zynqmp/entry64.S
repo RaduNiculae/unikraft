@@ -73,7 +73,7 @@ ENTRY(_libplat_entry)
 	msr        cpacr_el1, x0
 	isb
 #endif
-	bl drop_from_el3
+	//bl drop_to_el1
 
 #ifdef CONFIG_ARM64_EARLY_BOOTTICKS
 	ldr x24, =boot_ticks
